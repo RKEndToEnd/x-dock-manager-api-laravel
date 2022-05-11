@@ -45,8 +45,10 @@ class AuthController extends Controller
             ]);
         }
     }
-    public function login(Request $request){
-        $validator = Validator::make($request->all(),[
+
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'email' => 'required|string|email|max:255',
             'password' => 'required|string',
         ], [
@@ -55,17 +57,17 @@ class AuthController extends Controller
             'email.max' => 'Adres email nie może być dłuiższy niż 255 znaków.',
             'password.required' => 'Wpisz hasło.',
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json(['val_errors' => $validator->messages()
             ]);
-        }else{
+        } else {
             $user = User::where('email', $request->email)->first();
-            if (!$user || ! Hash::check($request->password, $user->password)) {
+            if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
-                    'status'=>401,
-                    'message'=>'Wprowadzono nieprawidłowe dane lgowania.'
+                    'status' => 401,
+                    'message' => 'Wprowadzono nieprawidłowe dane lgowania.'
                 ]);
-            }else{
+            } else {
                 $token = $user->createToken($user->email . '_Token')->plainTextToken;
                 return response()->json([
                     'status' => 200,
@@ -75,5 +77,14 @@ class AuthController extends Controller
                 ]);
             }
         }
+    }
+
+    public function logout()
+    {
+        auth()->user()->tokens()->delete();
+        return response()->json([
+            'status' => 200,
+            'message' => 'Wylogowano pomyślnie.',
+        ]);
     }
 }
