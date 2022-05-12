@@ -65,10 +65,14 @@ class AuthController extends Controller
             if (!$user || !Hash::check($request->password, $user->password)) {
                 return response()->json([
                     'status' => 401,
-                    'message' => 'Wprowadzono nieprawidłowe dane lgowania.'
+                    'message' => 'Wprowadzono nieprawidłowe dane logowania.'
                 ]);
             } else {
-                $token = $user->createToken($user->email . '_Token')->plainTextToken;
+                if ($user->role == 1) {
+                    $token = $user->createToken($user->email . '_AdminToken', ['server:admin'])->plainTextToken;
+                } else {
+                    $token = $user->createToken($user->email . '_Token',[''])->plainTextToken;
+                }
                 return response()->json([
                     'status' => 200,
                     'username' => $user->name,
